@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,12 +27,14 @@ namespace ImageServer.WebApi.Controllers
 
             using (var primary = Image.Load(request.Primary))
             {
+
                 //ignore multiple elements
                 var secondary = secondaries.ElementAt(0);
 
                 var overlapPercentage = (int)(100 - request.SubImages.ElementAt(0).Overlap) / 100;
                 //Create empty filr for output
                 int width = primary.Width + secondary.Width * overlapPercentage;
+                var heightAddition = GetHeightAddition(request.SubImages);
                 int height = primary.Height + secondary.Height * overlapPercentage;
 
                 using (var output = new Image<Rgba32>(width, height))
@@ -57,6 +60,22 @@ namespace ImageServer.WebApi.Controllers
 
             for (int i = 0; i < secondaries.Count(); i++)
                 secondaries.ElementAt(i).Dispose();
+
+            throw new NotImplementedException();
+        }
+
+        private int[] GetHeightAddition(IEnumerable<SubImage> subImages)
+        {
+            var result = new [] { 0, 0 };
+            var siLocations = subImages.Select(si => (SubImageLocation)si.MergeLocation);
+
+            //Choose max overlap from bottom and top
+            if (siLocations.Any(slBotton =>
+            slBotton == SubImageLocation.BottomLeft ||
+            slBotton == SubImageLocation.BottomMiddle ||
+            slBotton == SubImageLocation.BottomRight))
+                result[0] = 
+
 
             throw new NotImplementedException();
         }
