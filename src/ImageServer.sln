@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageServer.WebApi", "ImageServer.WebApi\ImageServer.WebApi.csproj", "{68242EC2-189C-44A0-B3F0-987338538CFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68242EC2-189C-44A0-B3F0-987338538CFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68242EC2-189C-44A0-B3F0-987338538CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68242EC2-189C-44A0-B3F0-987338538CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68242EC2-189C-44A0-B3F0-987338538CFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2128CBBB-53CF-4ACD-9CC7-81070377D876}
+	EndGlobalSection
+EndGlobal
