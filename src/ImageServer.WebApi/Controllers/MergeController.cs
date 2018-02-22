@@ -18,52 +18,111 @@ namespace ImageServer.WebApi.Controllers
         {
             using (var primaryImage = new Bitmap(Image.FromFile(request.Primary)))
             {
-                var topRightImage = GetSubImageByPosition(request.SubImages, SubImageLocation.TopRight);
-                var middleRightImage = GetSubImageByPosition(request.SubImages, SubImageLocation.Right);
-                var bottomRightImage = GetSubImageByPosition(request.SubImages, SubImageLocation.BottomRight);
+                var subImages = GetSubImagesByPosition(request.SubImages);
 
-                var paddingRight = Math.Max(Math.Max(topRightImage?.Width ?? 0, middleRightImage?.Width ?? 0), bottomRightImage?.Width ?? 0);
+                var rightImages = subImages.Where(si =>
+                    si.Key == SubImageLocation.TopRight
+                    || si.Key == SubImageLocation.MiddleRight
+                    || si.Key == SubImageLocation.BottomRight);
+                var paddingRight = rightImages.Any()? rightImages.Max(x => x.Value.Width): 0;
 
-                var topLeftImage = GetSubImageByPosition(request.SubImages, SubImageLocation.TopLeft);
-                var middleLeftImage = GetSubImageByPosition(request.SubImages, SubImageLocation.Left);
-                var bottomLeftImage = GetSubImageByPosition(request.SubImages, SubImageLocation.BottomLeft);
-
-                var paddingLeft = Math.Max(Math.Max(topLeftImage?.Width ?? 0, middleLeftImage?.Width ?? 0), bottomLeftImage?.Width ?? 0);
+                var leftImages = subImages.Where(si =>
+                si.Key == SubImageLocation.TopLeft
+                || si.Key == SubImageLocation.MiddleLeft
+                || si.Key == SubImageLocation.BottomLeft);
+                var paddingLeft = leftImages.Any()? leftImages.Max(x => x.Value.Width) : 0;
 
                 var newHeight = primaryImage.Height;
                 var newWidth = primaryImage.Width + paddingRight + paddingLeft;
                 var newImage = new Bitmap(newWidth, newHeight);
 
                 PlacePrimaryImage(newImage, primaryImage, paddingLeft);
-                PlaceLeftImages(newImage, paddingLeft, topLeftImage, middleLeftImage, bottomLeftImage);
+                PlaceSubImages(newImage, subImages);
 
-
-                //put right Top Image
-                if (topRightImage != null)
-                {
-                    for (int y = 0; y < topRightImage.Height; y++)
-                    {
-                        for (int x = 0; x < topRightImage.Width; x++)
-                        {
-                            Color col = topRightImage.GetPixel(x, y);
-                            newImage.SetPixel(newWidth - topRightImage.Width + x, y, col);
-                        }
-                    }
-                }
-
-
-                
                 newImage.Save("output/newImage.jpg");
 
-                if (topRightImage != null)
-                    topRightImage.Dispose();
+                if (subImages != null)
+                {
+                    foreach (var bm in subImages.Values)
+                        bm.Dispose();
+                }
             }
             return Ok();
         }
 
-        private void PlaceLeftImages(Bitmap newImage, int paddingLeft, Bitmap topLeftImage, Bitmap middleLeftImage, Bitmap bottomLeftImage)
+        private void PlaceSubImages(Bitmap outputImage, IDictionary<SubImageLocation, Bitmap> subImages)
         {
-            throw new NotImplementedException();
+            var outputStartYIndex = 0;
+            var outputStartXIndex = 0;
+            int maxImgHeight = 0;
+
+            foreach (var img in subImages)
+            {
+                var image = img.Value;
+                var location = img.Key;
+
+                switch (location)
+                {
+                    case SubImageLocation.TopRight:
+                        outputStartYIndex = 0;
+                        outputStartXIndex = Math.Max( outputImage.Width-img.Value.Width, 0);
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height);
+                        break;
+                    case SubImageLocation.TopMiddle:
+                        outputStartYIndex = 0;
+                        outputStartXIndex = Math.Max((outputImage.Width - img.Value.Width) / 2, 0);
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height - outputStartYIndex);
+                        break;
+                    case SubImageLocation.TopLeft:
+                        outputStartYIndex = 0;
+                        outputStartXIndex = 0;
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height);
+                        break;
+                    case SubImageLocation.MiddleRight:
+                        outputStartYIndex = Math.Max(0, (outputImage.Height - image.Height) / 2);
+                        outputStartXIndex = Math.Max(outputImage.Width - img.Value.Width, 0);
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height - outputStartYIndex);
+                        break;
+                    case SubImageLocation.Center:
+                        outputStartYIndex = Math.Max(0, (outputImage.Height - image.Height) / 2);
+                        outputStartXIndex = Math.Max((outputImage.Width - img.Value.Width)/2, 0);
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height - outputStartYIndex);
+                        break;
+                    case SubImageLocation.MiddleLeft:
+                        outputStartYIndex = Math.Max(0, (outputImage.Height - image.Height) / 2);
+                        outputStartXIndex = 0;
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height - outputStartYIndex);
+                        break;
+                    case SubImageLocation.BottomRight:
+                        outputStartYIndex = Math.Max(0, outputImage.Height - image.Height);
+                        outputStartXIndex = Math.Max(outputImage.Width - img.Value.Width, 0);
+                        maxImgHeight = image.Height;
+                        break;
+                    case SubImageLocation.BottomMiddle:
+                        outputStartYIndex = Math.Max(0, outputImage.Height - image.Height);
+                        outputStartXIndex = Math.Max((outputImage.Width - img.Value.Width)/2, 0);
+                        maxImgHeight = Math.Min(image.Height, outputImage.Height - outputStartYIndex);
+                        break;
+                    case SubImageLocation.BottomLeft:
+                        outputStartYIndex = Math.Max(0, outputImage.Height - image.Height);
+                        outputStartXIndex = 0;
+                        maxImgHeight = image.Height;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(location));
+                }
+
+                //place top left
+
+                for (int newImageY = outputStartYIndex, imgY = 0; imgY < maxImgHeight; newImageY++, imgY++)
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        Color col = image.GetPixel(x, imgY);
+                        outputImage.SetPixel(outputStartXIndex + x, newImageY, col);
+                    }
+                }
+            }
         }
 
         private void PlacePrimaryImage(Bitmap newImage, Bitmap primaryImage, int paddingLeft)
@@ -73,15 +132,19 @@ namespace ImageServer.WebApi.Controllers
                 for (int x = 0; x < primaryImage.Width; x++)
                 {
                     Color col = primaryImage.GetPixel(x, y);
-                    newImage.SetPixel(paddingLeft+ x, y, col);
+                    newImage.SetPixel(paddingLeft + x, y, col);
                 }
             }
         }
 
-        private Bitmap GetSubImageByPosition(IEnumerable<SubImage> subImages, SubImageLocation imgLocation)
+        private IDictionary<SubImageLocation, Bitmap> GetSubImagesByPosition(IEnumerable<SubImage> subImages)
         {
-            var img = subImages.FirstOrDefault(x => (SubImageLocation)x.MergeLocation == imgLocation);
-            return img != null ? new Bitmap(Image.FromFile(img.Uri)) : null;
+            var result = new Dictionary<SubImageLocation, Bitmap>();
+
+            var list = subImages.Where(si => Enum.TryParse(si.Location, true, out SubImageLocation sil));
+            foreach (var itm in list)
+                result[Enum.Parse<SubImageLocation>(itm.Location, true)] = new Bitmap(Image.FromFile(itm.Uri));
+            return result;
         }
 
         private (int addToTop, int addToBottom, int addToRight, int addToLeft) GetHeightValueToAdd(IEnumerable<System.Drawing.Image> subImages)

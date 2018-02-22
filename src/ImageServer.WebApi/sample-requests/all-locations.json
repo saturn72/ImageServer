@@ -1,0 +1,42 @@
+{
+  "primary": "images\\Labrador-Retriever-2.jpg",
+  "subImages": [
+    {
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "topLeft",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "middleLeft",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "bottomLeft",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "topMiddle",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "center",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "bottomMiddle",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "topRight",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "middleRight",
+      "overlap": 50
+    },{
+      "uri": "images\\hats-off-foursquare-badge-lg.png",
+      "location": "bottomRight",
+      "overlap": 50
+    }
+  ]
+}
